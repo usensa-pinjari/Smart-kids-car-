@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Smart Kids Car</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+:root{
+  --ink:#10243e;--muted:#6f8499;--blue:#1688ed;--green:#20b768;
+  --red:#ed3d35;--yellow:#ffc928;--card:#fff;--bg:#eef7ff;
+}
+html,body{margin:0;width:100%;height:100%;background:linear-gradient(135deg,#eef7ff,#e8f8f2 55%,#fff6dc);font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);overflow:hidden}
+button{font:inherit;border:0;touch-action:none;cursor:pointer}
+.screen{display:none;width:100%;height:100dvh}.screen.active{display:flex}
+
+#home{align-items:center;justify-content:center;text-align:center;padding:18px;position:relative;overflow:hidden}
+#home:before,#home:after{content:"";position:absolute;border-radius:50%;filter:blur(2px);opacity:.55;pointer-events:none}
+#home:before{width:280px;height:280px;background:#bde8ff;top:-90px;left:-80px;animation:orb 6s ease-in-out infinite}
+#home:after{width:330px;height:330px;background:#c9f5dc;right:-110px;bottom:-120px;animation:orb 7s ease-in-out infinite reverse}
+.home-card{position:relative;z-index:1;width:min(590px,96vw);padding:28px 22px 22px;border-radius:38px;background:#ffffffea;backdrop-filter:blur(14px);box-shadow:0 24px 80px #183b5a20;border:1px solid #fff}
+.car-stage{height:170px;display:flex;align-items:center;justify-content:center;position:relative}
+.hero-car{position:relative;width:250px;height:115px;animation:carFloat 2.5s ease-in-out infinite}
+.hero-body{position:absolute;left:22px;right:22px;bottom:28px;height:62px;border-radius:30px 42px 18px 18px;background:linear-gradient(145deg,#39a9ff,#1261a0);box-shadow:0 13px 0 #0c4d7d,0 18px 30px #1261a044}
+.hero-cabin{position:absolute;left:75px;top:13px;width:105px;height:48px;border-radius:48px 48px 12px 12px;background:linear-gradient(135deg,#dff7ff,#76c8ef);border:5px solid #1261a0}
+.hero-light{position:absolute;width:15px;height:15px;border-radius:50%;background:#fff4a8;box-shadow:0 0 18px #ffe45c;top:61px}
+.hero-light.l{left:31px}.hero-light.r{right:31px}
+.wheel{position:absolute;width:48px;height:48px;border-radius:50%;background:#152433;border:8px solid #526779;bottom:3px;box-shadow:inset 0 0 0 5px #0b1520}
+.wheel:after{content:"";position:absolute;inset:12px;border-radius:50%;background:#a9c2d5}
+.wheel.w1{left:45px}.wheel.w2{right:45px}
+.hero-car.drive{animation:driveBounce .32s linear infinite}
+.hero-car.turn-left{transform:rotate(-3deg) translateX(-5px)}
+.hero-car.turn-right{transform:rotate(3deg) translateX(5px)}
+.hero-car.brake{animation:brake .42s ease-in-out 2}
+.hero-car.drive .wheel{animation:spin .38s linear infinite}
+.title{font-size:clamp(34px,8vw,58px);font-weight:950;letter-spacing:-2px;margin:2px 0;color:#1261a0;text-shadow:0 4px 0 #d8efff}
+.subtitle{font-size:18px;color:#5c7188;margin:7px 0 22px}
+.big-play{width:min(390px,92%);padding:20px;border-radius:25px;background:linear-gradient(180deg,#2bd27d,#20b768);color:#fff;font-size:28px;font-weight:950;box-shadow:0 9px 0 #12854a,0 18px 30px #20b76835;animation:pulsePlay 1.8s ease-in-out infinite}
+.big-play:active{transform:translateY(7px);box-shadow:0 2px 0 #12854a}
+.ready{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:17px;font-size:13px;font-weight:850;color:#178a54}
+.ready-dot{width:10px;height:10px;border-radius:50%;background:#20b768;box-shadow:0 0 0 6px #20b76822;animation:dotPulse 1.5s infinite}
+.small-note{margin-top:12px;font-size:12px;color:#789}
+
+#connect{align-items:center;justify-content:center;text-align:center;padding:20px;position:relative}
+.connect-card{width:min(520px,94vw);background:#fff;border-radius:32px;padding:30px;box-shadow:0 22px 70px #183b5a20}
+.connect-card h2{font-size:30px;margin:8px}.connect-btn{padding:18px 28px;border-radius:20px;background:#1688ed;color:#fff;font-size:20px;font-weight:900;box-shadow:0 7px 0 #0c62b1;transition:.15s}
+.connect-btn:active{transform:translateY(5px);box-shadow:0 2px 0 #0c62b1}.back{background:#e9f1f8;color:#42627d;box-shadow:0 6px 0 #c6d5e1;margin-top:12px}
+
+#drive{flex-direction:column;padding:8px;gap:8px;background:linear-gradient(135deg,#eaf6ff,#f2fff8)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:7px;background:#fffffff2;border-radius:19px;padding:8px 11px;box-shadow:0 7px 24px #183b5a12;flex-wrap:wrap}
+.brand{font-size:20px;font-weight:950}.status{font-size:13px;font-weight:900}.ok{color:#16a05d}.bad{color:#e33}
+.pill{padding:7px 10px;border-radius:13px;background:#edf5fb;font-weight:900;font-size:12px;transition:.2s}.pill.danger{background:#ffe0dc;color:#d8271c;animation:dangerPulse .55s infinite alternate}
+.main{min-height:0;flex:1;display:flex;gap:8px}
+.camera-wrap{flex:1.55;min-width:0;background:#07131f;border-radius:22px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 35px #183b5a18}
+.camera-wrap:after{content:"";position:absolute;inset:0;border:3px solid transparent;border-radius:22px;pointer-events:none;transition:.2s}
+.camera-wrap.eye-warn:after{border-color:#ff5a4d;box-shadow:inset 0 0 35px #ff5a4d66;animation:cameraAlert .6s infinite alternate}
+.camera-wrap video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.cam-overlay{position:absolute;left:10px;right:10px;top:10px;display:flex;justify-content:space-between;pointer-events:none;gap:7px}
+.cam-badge{background:#000a;color:#fff;padding:8px 10px;border-radius:13px;font-size:12px;font-weight:900;backdrop-filter:blur(6px)}
+.cam-badge.eye-alert{background:#d8271ddd;animation:dangerPulse .55s infinite alternate}
+.controls{flex:1;min-width:270px;display:flex;flex-direction:column;gap:7px}
+.status-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.info{background:#fff;border-radius:17px;padding:9px;text-align:center;font-weight:900;font-size:14px;box-shadow:0 5px 18px #183b5a12;transition:.2s}.info small{display:block;color:#70879c;font-weight:650;font-size:10px}.drowsy{color:#16a05d}.drowsy.warn{background:#ffe1de;color:#d8271c;animation:dangerPulse .55s infinite alternate}
+.pad{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr;gap:7px;flex:1}
+.drive-btn{border-radius:20px;background:#fff;color:#18344d;font-size:clamp(18px,3vw,28px);font-weight:950;box-shadow:0 6px 0 #cad9e5,0 9px 18px #183b5a0d;transition:transform .08s,box-shadow .08s,filter .15s}
+.drive-btn:active,.drive-btn.active{transform:translateY(5px);box-shadow:0 1px 0 #cad9e5;background:#dff1ff}
+.go{grid-column:2}.left{grid-column:1;grid-row:2}.right{grid-column:3;grid-row:2}.backbtn{grid-column:2;grid-row:3}
+.go.active,.backbtn.active{animation:moveGlow .45s infinite alternate}
+.left.active{animation:turnLeft .45s infinite alternate}.right.active{animation:turnRight .45s infinite alternate}
+.stop{grid-column:1/4;background:linear-gradient(180deg,#f45149,#ed3d35);color:#fff;box-shadow:0 6px 0 #b92822}.stop.braking{animation:stopFlash .28s infinite alternate}
+.advanced{display:flex;gap:6px}.advanced button{flex:1;padding:8px;border-radius:12px;background:#dfeaf3;color:#42627d;font-size:12px;font-weight:850}
+.safety-strip{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);padding:8px 15px;border-radius:18px;background:#16a05dcc;color:#fff;font-weight:950;font-size:13px;backdrop-filter:blur(6px);display:none}.safety-strip.show{display:block;animation:dangerPulse .5s infinite alternate;background:#d8271ddd}
+
+.overlay{position:fixed;inset:0;background:#0009;display:none;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(7px)}
+.overlay.show{display:flex}
+.alert-card{width:min(430px,90vw);background:#fff;border-radius:30px;text-align:center;padding:28px;box-shadow:0 0 80px #f33}
+.alert-icon{font-size:65px;animation:float .8s ease-in-out infinite}
+.alert-card h2{color:#df2c25;font-size:30px;margin:6px}.alert-card p{color:#5d7183;line-height:1.5}
+.alert-card button{padding:14px 24px;border-radius:16px;background:#1688ed;color:#fff;font-weight:950;box-shadow:0 6px 0 #0c62b1}
+
+@keyframes float{50%{transform:translateY(-8px)}}
+@keyframes orb{50%{transform:translate(20px,15px) scale(1.08)}}
+@keyframes carFloat{50%{transform:translateY(-8px)}}
+@keyframes driveBounce{50%{transform:translateY(-2px) scale(1.01)}}
+@keyframes brake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulsePlay{50%{transform:scale(1.025);box-shadow:0 9px 0 #12854a,0 0 30px #20b76855}}
+@keyframes dotPulse{50%{box-shadow:0 0 0 10px #20b76811}}
+@keyframes moveGlow{to{filter:brightness(1.08);transform:translateY(2px) scale(1.015)}}
+@keyframes turnLeft{to{transform:rotate(-4deg) translateX(-3px)}}
+@keyframes turnRight{to{transform:rotate(4deg) translateX(3px)}}
+@keyframes dangerPulse{to{filter:brightness(1.12);transform:scale(1.025)}}
+@keyframes cameraAlert{to{border-color:#ffb020}}
+@keyframes stopFlash{to{filter:brightness(1.35)}}
+@media(max-width:700px){
+  #drive{overflow:auto}.main{flex-direction:column}.camera-wrap{flex:none;height:42dvh;min-height:230px}.controls{min-width:0}.pad{min-height:280px}
+  .brand{font-size:16px}.pill{font-size:10px}.top{justify-content:center}.car-stage{height:145px}.hero-car{transform:scale(.85)}
+}
+@media(max-width:430px){.camera-wrap{height:37dvh}.drive-btn{font-size:18px}.advanced button{font-size:10px;padding:7px 4px}}
+</style>
+</head>
+<body>
+<section id="home" class="screen active"><div class="home-card">
+<div class="car-stage"><div id="heroCar" class="hero-car">
+<div class="hero-cabin"></div><div class="hero-body"></div><div class="hero-light l"></div><div class="hero-light r"></div>
+<div class="wheel w1"></div><div class="wheel w2"></div></div></div>
+<div class="title">MY SMART CAR</div><div class="subtitle">Ready for a fun and safe ride?</div>
+<button id="playBtn" class="big-play">▶️ PLAY</button>
+<div class="ready"><span class="ready-dot"></span> SAFETY SYSTEM READY</div>
+<div class="small-note">Adult supervision recommended • Safety sensors stay active</div>
+</div></section>
+<section id="connect" class="screen"><div class="connect-card"><div class="car" style="font-size:64px">🚗</div><h2>Connect Your Car</h2><p id="connectText">Tap connect, then choose <b>Smart Kids Car</b>.</p><button id="connectBtn" class="connect-btn">🔵 CONNECT CAR</button><br><button id="homeBtn" class="connect-btn back">← HOME</button></div></section>
+<section id="drive" class="screen"><div class="top"><div class="brand">🚗 MY SMART CAR</div><div id="bleStatus" class="status bad">🔴 OFFLINE</div><div class="pill">Front <span id="front">--</span> cm</div><div class="pill">Back <span id="rear">--</span> cm</div></div><div class="main"><div class="camera-wrap" id="cameraWrap"><video id="video" autoplay playsinline muted></video><div class="cam-overlay"><div id="eyeBadge" class="cam-badge">👀 CAMERA OFF</div><div id="safeBadge" class="cam-badge">🛡️ SAFE</div></div></div><div class="safety-strip" id="safetyStrip">🛑 OBSTACLE — CAR STOPPED</div></div><div class="controls"><div class="status-row"><div id="eyeInfo" class="info drowsy">😊<small>DRIVER</small>AWAKE</div><div class="info"><span id="modeText">🐢 EASY</span><small>DRIVE MODE</small></div></div><div class="pad"><button id="go" class="drive-btn go">⬆️<br>GO</button><button id="left" class="drive-btn left">⬅️<br>LEFT</button><button id="right" class="drive-btn right">➡️<br>RIGHT</button><button id="back" class="drive-btn backbtn">⬇️<br>BACK</button><button id="stop" class="drive-btn stop">🛑 STOP</button></div><div class="advanced"><button id="cameraBtn">📷 CAMERA</button><button id="modeBtn">⚡ FAST MODE</button><button id="parentBtn">⚙️ ADULT</button></div></div></div></section>
+<div id="alert" class="overlay"><div class="alert-card"><div id="alertIcon" class="alert-icon">😴</div><h2 id="alertTitle">CAR STOPPED</h2><p id="alertText">Driver eyes were closed for about 1 second.</p><button id="alertOk">OK — I'M AWAKE</button></div></div>
+<script>
+const SERVICE_UUID='4fafc201-1fb5-459e-8fcc-c5c9c331914b';
+const CMD_CHAR_UUID='beb5483e-36e1-4688-b7f5-ea07361b26a8';
+const TELE_CHAR_UUID='beb5483e-36e1-4688-b7f5-ea07361b26a9';
+
+let bleDevice=null,cmdChar=null,teleChar=null,stream=null,landmarker=null,running=false,facing='user';
+let closedAt=null,drowsyLatched=false,gear='F',fastMode=false;
+let frontDistance=0,rearDistance=0,currentMotion='STOP';
+
+const $=id=>document.getElementById(id);
+function show(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(id).classList.add('active')}
+function heroState(state){
+  const c=$('heroCar'); if(!c)return;
+  c.classList.remove('drive','turn-left','turn-right','brake');
+  if(state)c.classList.add(state);
+}
+function setButtonActive(id,on){const b=$(id);if(b)b.classList.toggle('active',on)}
+function clearMotionUI(){['go','back','left','right'].forEach(id=>setButtonActive(id,false));heroState('');currentMotion='STOP'}
+
+$('playBtn').onclick=()=>show('connect');
+$('homeBtn').onclick=()=>{safeStop();show('home')};
+$('connectBtn').onclick=connectBLE;
+
+async function connectBLE(){
+  if(!navigator.bluetooth){$('connectText').textContent='Please open this website in Chrome on Android.';return}
+  try{
+    $('connectText').textContent='Looking for your car...';
+    bleDevice=await navigator.bluetooth.requestDevice({filters:[{services:[SERVICE_UUID]}]});
+    bleDevice.addEventListener('gattserverdisconnected',()=>{setBle(false);safeStop();$('connectText').textContent='Car disconnected. Tap CONNECT to reconnect.'});
+    const server=await bleDevice.gatt.connect();
+    const service=await server.getPrimaryService(SERVICE_UUID);
+    cmdChar=await service.getCharacteristic(CMD_CHAR_UUID);
+    teleChar=await service.getCharacteristic(TELE_CHAR_UUID);
+    await teleChar.startNotifications();
+    teleChar.addEventListener('characteristicvaluechanged',onTelemetry);
+    setBle(true);show('drive');startCamera();
+  }catch(e){$('connectText').textContent='Connection cancelled or failed. Tap CONNECT and try again.';console.error(e)}
+}
+function setBle(ok){$('bleStatus').textContent=ok?'🟢 CONNECTED':'🔴 OFFLINE';$('bleStatus').className='status '+(ok?'ok':'bad')}
+
+async function sendCmd(c){
+  if(!cmdChar)return;
+  try{
+    const d=new TextEncoder().encode(c);
+    if(cmdChar.writeValueWithoutResponse)await cmdChar.writeValueWithoutResponse(d);else await cmdChar.writeValue(d);
+  }catch(e){console.error(e)}
+}
+
+function safeStop(){
+  currentMotion='STOP';clearMotionUI();sendCmd('S');
+  $('stop').classList.add('braking');setTimeout(()=>$('stop').classList.remove('braking'),350);
+}
+
+function obstacleForGear(){
+  return gear==='F'&&frontDistance>0&&frontDistance<=20 ||
+         gear==='R'&&rearDistance>0&&rearDistance<=20;
+}
+function onTelemetry(e){
+  const v=new TextDecoder().decode(e.target.value);
+  const m=v.match(/F:(-?\d+),R:(-?\d+)/);
+  if(!m)return;
+  frontDistance=+m[1];rearDistance=+m[2];
+  $('front').textContent=m[1];$('rear').textContent=m[2];
+  $('front').parentElement.classList.toggle('danger',frontDistance>0&&frontDistance<=20);
+  $('rear').parentElement.classList.toggle('danger',rearDistance>0&&rearDistance<=20);
+  const blocked=obstacleForGear();
+  $('safeBadge').textContent=blocked?'🛑 OBSTACLE':'🛡️ SAFE';
+  $('safeBadge').classList.toggle('eye-alert',blocked);
+  $('safetyStrip').classList.toggle('show',blocked);
+  if(blocked && currentMotion!=='STOP')safeStop();
+}
+
+function startMove(id,command,dir){
+  const b=$(id);
+  const start=e=>{
+    e.preventDefault();
+    if(drowsyLatched || !cmdChar)return;
+    gear=dir==='F'?'F':'R';
+    if(obstacleForGear()){safeStop();return}
+    clearMotionUI();b.classList.add('active');currentMotion=dir;heroState(dir==='F'?'drive':'drive');
+    sendCmd(command);
+  };
+  const end=e=>{e.preventDefault();if(currentMotion===dir)safeStop()};
+  b.addEventListener('pointerdown',start);
+  ['pointerup','pointercancel','pointerleave'].forEach(x=>b.addEventListener(x,end));
+}
+startMove('go','F','F');
+startMove('back','B','R');
+
+function bindSteer(id,command,state){
+  const b=$(id);
+  const start=e=>{
+    e.preventDefault();
+    if(drowsyLatched||!cmdChar)return;
+    b.classList.add('active');heroState(state);sendCmd(command);
+  };
+  const end=e=>{e.preventDefault();b.classList.remove('active');heroState(currentMotion==='STOP'?'': 'drive');sendCmd('L:0')};
+  b.addEventListener('pointerdown',start);
+  ['pointerup','pointercancel','pointerleave'].forEach(x=>b.addEventListener(x,end));
+}
+bindSteer('left','L:-70','turn-left');
+bindSteer('right','L:70','turn-right');
+$('stop').onclick=safeStop;
+
+$('modeBtn').onclick=()=>{
+  fastMode=!fastMode;
+  $('modeText').textContent=fastMode?'⚡ FAST MODE':'🐢 EASY';
+  sendCmd(fastMode?'MODE:SPORT':'MODE:ECO');
+};
+
+$('cameraBtn').onclick=()=>{if(stream)stopCamera();else startCamera()};
+$('parentBtn').onclick=()=>alert('Adult area: GPS, SMS, ECO/SPORT and diagnostics can stay here.');
+
+$('alertOk').onclick=()=>{
+  drowsyLatched=false;closedAt=null;$('alert').classList.remove('show');
+  $('eyeInfo').innerHTML='😊<small>DRIVER</small>AWAKE';$('eyeInfo').classList.remove('warn');
+  $('eyeBadge').textContent='👀 EYES CLEAR';$('cameraWrap').classList.remove('eye-warn');
+  sendCmd('EYE:CLEAR');safeStop();
+};
+
+async function startCamera(){
+  try{
+    if(stream)return;
+    $('eyeBadge').textContent='📷 STARTING CAMERA...';
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing},audio:false});
+    $('video').srcObject=stream;await $('video').play();
+    $('eyeBadge').textContent='👀 EYE AI LOADING...';
+    await loadModel();
+    $('eyeBadge').textContent='👀 EYE AI READY';
+    running=true;requestAnimationFrame(detectLoop);
+  }catch(e){
+    $('eyeBadge').textContent='📷 CAMERA / AI ERROR';
+    console.error(e);
+  }
+}
+function stopCamera(){
+  running=false;
+  if(stream)stream.getTracks().forEach(t=>t.stop());
+  stream=null;$('video').srcObject=null;$('eyeBadge').textContent='👀 CAMERA OFF';
+  $('cameraWrap').classList.remove('eye-warn');closedAt=null;
+  if(!drowsyLatched)sendCmd('EYE:CLEAR');
+}
+
+async function loadModel(){
+  if(landmarker)return;
+  const vision=await import('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14');
+  const fs=await vision.FilesetResolver.forVisionTasks('https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm');
+  landmarker=await vision.FaceLandmarker.createFromOptions(fs,{
+    baseOptions:{
+      modelAssetPath:'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task',
+      delegate:'GPU'
+    },
+    outputFaceBlendshapes:true,runningMode:'VIDEO',numFaces:1
+  });
+}
+
+function updateEyeUI(closed,ms){
+  if(closed){
+    $('eyeInfo').innerHTML='😴<small>DRIVER</small>EYES CLOSED';
+    $('eyeInfo').classList.add('warn');$('cameraWrap').classList.add('eye-warn');
+    $('eyeBadge').textContent=ms>=1000?'🛑 EYES CLOSED — STOP':'😴 EYES CLOSING...';
+  }else{
+    $('eyeInfo').innerHTML='😊<small>DRIVER</small>AWAKE';
+    $('eyeInfo').classList.remove('warn');$('cameraWrap').classList.remove('eye-warn');
+    $('eyeBadge').textContent='👀 EYE AI READY';
+  }
+}
+
+function detectLoop(now){
+  if(!running)return;
+  try{
+    const r=landmarker.detectForVideo($('video'),now);
+    let closed=false;
+    if(r.faceBlendshapes?.length){
+      const c=r.faceBlendshapes[0].categories;
+      const l=c.find(x=>x.categoryName==='eyeBlinkLeft');
+      const rr=c.find(x=>x.categoryName==='eyeBlinkRight');
+      closed=((l?.score||0)+(rr?.score||0))/2>0.5;
+    }
+    if(closed){
+      if(closedAt===null)closedAt=now;
+      const ms=now-closedAt;updateEyeUI(true,ms);
+      if(ms>=1000&&!drowsyLatched){
+        drowsyLatched=true;safeStop();sendCmd('EYE:WARN');
+        $('alertText').textContent='Driver eyes closed for about 1 second. Car has stopped and is locked until GO or BACK.';
+        $('alert').classList.add('show');
+      }
+    }else{
+      closedAt=null;
+      if(!drowsyLatched){updateEyeUI(false,0);sendCmd('EYE:CLEAR')}
+    }
+  }catch(e){$('eyeBadge').textContent='👀 EYE AI CHECK';console.error(e)}
+  requestAnimationFrame(detectLoop);
+}
+
+window.addEventListener('pagehide',safeStop);
+window.addEventListener('beforeunload',safeStop);
+</script>
+</body></html>
